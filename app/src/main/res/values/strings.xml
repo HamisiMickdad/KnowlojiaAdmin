@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Knowlojia Admin</string>
+
+    <array name="entries">
+        <item>Android Tricks</item>
+        <item>Kenyan DIYs</item>
+        <item>Windows Tricks</item>
+        <item>Tech Buying Guide</item>
+        <item>Photography</item>
+
+
+    </array>
+
+</resources>
