@@ -7,8 +7,7 @@
         <item>Windows Tricks</item>
         <item>Tech Buying Guide</item>
         <item>Photography</item>
-
-
     </array>
+    <string name="notify">New Blog posted Check it Out</string>
 
 </resources>

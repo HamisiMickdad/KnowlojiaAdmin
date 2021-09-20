@@ -14,8 +14,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Html;
+import android.text.Spannable;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.AutoCompleteTextView;
@@ -38,7 +41,15 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 public class AddPost extends AppCompatActivity {
@@ -72,6 +83,8 @@ public class AddPost extends AppCompatActivity {
     String currentTitle, cDescr, cLink, currentImage;
 
     Spinner spinner;
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static String LEGACY_SERVER_KEY="AIzaSyCutabQ7kh1hqd7a8czGG2p68Wmt801GX8";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,6 +217,7 @@ public class AddPost extends AppCompatActivity {
                 Uri downloadUri = uriTask.getResult();
                 updateDatabase(downloadUri.toString());
 
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -280,6 +294,8 @@ public class AddPost extends AppCompatActivity {
                             //String mPostLink = mLinkEt.getText().toString().trim();
                             //hide progress dialog
                             mProgressDialog.dismiss();
+
+
                             //Show toast that image is successfully uploaded
                             Toast.makeText(AddPost.this, "Successfully Uploaded....", Toast.LENGTH_SHORT).show();
                             ImageUploadInfo imageUploadInfo = new ImageUploadInfo(mPostTitle, mPostDescr, downloadUri.toString(), mPostTitle.toLowerCase());
@@ -290,6 +306,7 @@ public class AddPost extends AppCompatActivity {
                             mTitleEt.setText("");
                             mDescrEt.setText("");
                             //mLinkEt.setText("");
+                            sendNotification(mPostTitle);
 
                         }
                     })
@@ -354,6 +371,34 @@ public class AddPost extends AppCompatActivity {
             }
         }
     }
+    private void sendNotification(final String sTitle) {
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    OkHttpClient client = new OkHttpClient();
+                    JSONObject json=new JSONObject();
+                    JSONObject dataJson=new JSONObject();
+                    dataJson.put("title",sTitle);
+                    dataJson.put("body",getString(R.string.notify));
+                    //dataJson.put("body",sBody);
+                    json.put("data",dataJson);
+                    json.put("to","/topics/zitano");
+                    //json.put("to","/topics/sportytipstest");
+                    RequestBody body = RequestBody.create(AddPost.JSON, json.toString());
+                    Request request = new Request.Builder()
+                            .header("Authorization","key=AIzaSyCutabQ7kh1hqd7a8czGG2p68Wmt801GX8")
+                            .url("https://fcm.googleapis.com/fcm/send")
+                            .post(body)
+                            .build();
+                    Response response = client.newCall(request).execute();
 
+                }catch (Exception e){
+                }
+                return null;
+            }
+        }.execute();
+
+    }
 
 }
